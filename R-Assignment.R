@@ -115,15 +115,13 @@ for (i in 1:10) {
 } # Writes the result to a file
 
 # unknown positions for maize, this is looking at rows where the third column has a "?"
-unknown_positions_maize <- subset(joined_maize, joined_maize[[3]] == "?")
-
-write.table(unknown_positions_maize, file = "unknown_positions_maize.txt", 
+write.table(subset(joined_maize, joined_maize[[3]] == "?"), 
+            file = file.path("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment", "unknown_positions_maize.txt"), 
             row.names = FALSE, col.names = TRUE, quote = FALSE, sep = "\t")
 
 # unknown positions for teosinte, this is also looking at rows where the third column has a "?"
-unknown_positions_teosinte <- subset(joined_teosinte, joined_teosinte[[3]] == "?")
-
-write.table(unknown_positions_teosinte, file = "unknown_positions_teosinte.txt", 
+write.table(subset(joined_teosinte, joined_teosinte[[3]] == "?"), 
+            file = file.path("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment", "unknown_positions_teosinte.txt"), 
             row.names = FALSE, col.names = TRUE, quote = FALSE, sep = "\t")
 
 # Data Visualization: Part II
@@ -148,5 +146,10 @@ ggplot(combined_data, aes(x = as.factor(combined_data$Chromosome), fill = Type))
   theme_minimal() +
   scale_fill_manual(values = c("Maize" = "blue", "Teosinte" = "red"))
 # From what I can tell based on the graph it seems as though teosinte and maize have the same number of SNPs in each chromosome
+
+
+
+
+
 
 
