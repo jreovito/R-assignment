@@ -83,14 +83,14 @@ joined_teosinte <- merge(SNP_clean, teosinte_transpose, by = "row.names")
 for (i in 1:10) {chr_data <- subset(joined_maize, joined_maize[[3]] == i)  # Filters rows where the third column matches the chromosome number
 chr_data[is.na(chr_data)] <- "?" # Replaces NA values with "?"
 chr_data <- chr_data[order(chr_data[[2]]), ]  # Sorts the data by the second column in increasing order
-assign(paste0("chr", i, "_increasing_maize"), chr_data)
+assign(paste0("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment/chr", i, "_increasing_maize"), chr_data)
 }  # Saves the result as a new dataframe in the environment
 
 # same thing but for teosinte data
 for (i in 1:10) {chr_teosinte <- subset(joined_teosinte, joined_teosinte[[3]] == i) # Creates a new variable name for each chromosome dataset
 chr_teosinte[is.na(chr_teosinte)] <- "?"  # Replaces NA values with "?"
 chr_teosinte <- chr_teosinte[order(chr_teosinte[[2]]), ]  # Sorts the data by the second column in increasing order
-assign(paste0("chr", i, "_increasing_teosinte"), chr_teosinte)
+assign(paste0("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment/chr", i, "_increasing_teosinte"), chr_teosinte)
 }   # Saves as a separate dataframe in the environment
 
 # Maize in decreasing order replacing "?" with "-"
@@ -99,8 +99,8 @@ for (i in 1:10) {
   chr_maize <- subset(joined_maize, joined_maize[[3]] == i) # Creates a new variable for each chromosome dataset
   chr_maize[chr_maize == "?"] <- "-" # Replaces "?" with "-"
   chr_maize <- chr_maize[order(chr_maize[[2]], decreasing = TRUE), ] # Sorts by the second column in decreasing order
-  assign(paste0("chr", i, "_decreasing_maize"), chr_maize) # Saves as a separate dataframe in the environment
-  write.table(chr_maize, file = paste0("chr", i, "_decreasing_maize.txt"), 
+  assign(paste0("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment/chr", i, "_decreasing_maize"), chr_maize) # Saves as a separate dataframe in the environment
+  write.table(chr_maize, file = paste0("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment/chr", i, "_decreasing_maize.txt"), 
               row.names = FALSE, col.names = TRUE, quote = FALSE, sep = "\t")
 } # Writes to a text file
 
@@ -110,7 +110,7 @@ for (i in 1:10) {
   dec_teosinte[dec_teosinte == "?"] <- "-"  # Replace "?" with "-"
   dec_teosinte <- dec_teosinte[order(dec_teosinte[[2]], decreasing = TRUE), ] # Sorts the data by the second column in decreasing order
   assign(paste0("chr", i, "_decreasing_teosinte"), dec_teosinte) # Saves as a new variable in the environment
-  write.table(dec_teosinte, file = paste0("chr", i, "_decreasing_teosinte.txt"), 
+  write.table(dec_teosinte, file = paste0("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment/chr", i, "_decreasing_teosinte.txt"), 
               row.names = FALSE, col.names = TRUE, quote = FALSE, sep = "\t")
 } # Writes the result to a file
 
@@ -148,6 +148,5 @@ ggplot(combined_data, aes(x = as.factor(combined_data$Chromosome), fill = Type))
   theme_minimal() +
   scale_fill_manual(values = c("Maize" = "blue", "Teosinte" = "red"))
 # From what I can tell based on the graph it seems as though teosinte and maize have the same number of SNPs in each chromosome
-
 
 
