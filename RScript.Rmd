@@ -1,27 +1,21 @@
-title: "R_Assignment"
-author: "Jordyn Eovito"
-output:
-  pdf_document: default
-  html_document: default
----
+title: "R_Assignment" author: "Jordyn Eovito" output: pdf_document: default html_document: default ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-
- 
 ## Data inspection
 
 Setting my working directory, loading library
+
 ```{r message=FALSE, warning=FALSE, results=FALSE}
 setwd("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/Data files")
 
 library(dplyr)
 ```
 
-
 assigning txt files to fang or snp
+
 ```{r, message=FALSE, warning=FALSE, results=FALSE}
 fang <- fang_et_al_genotypes
 snp <- snp_position
@@ -44,8 +38,8 @@ tail(fang, 10) # shows last 10 rows of data
 tail(snp, 10) # shows last 10 rows of data
 ```
 
-
 this forloop displays the contents of each variable in the snp file
+
 ```{r, message=FALSE, warning=FALSE, results=FALSE}
 for(i in 1:ncol(snp)) {
   print(names(snp)[i])
@@ -55,6 +49,7 @@ for(i in 1:ncol(snp)) {
 ```
 
 same thing but for fang file
+
 ```{r}
 for(i in 1:ncol(fang)) {
   print(names(fang)[i])
@@ -76,14 +71,15 @@ genotype_data <- read.table(file = "fang_et_al_genotypes.txt", header = TRUE)
 ```
 
 For Maize: filter these specified groups, ZMMIL, ZMMLR, ZMMR and assign to genotypes_maize. Essentially, this is extracting the rows when the group is one of the three indicated groups
+
 ```{r}
 genotypes_maize <- filter(genotype_data, Group == "ZMMIL" | Group == "ZMMLR" | Group == "ZMMR")
 
 print(genotypes_maize)
 ```
 
-
 Same thing but for teosinte data
+
 ```{r, results=FALSE}
 genotypes_teosinte <- filter(genotype_data, Group == "ZMPBA" | Group == "ZMPIL" | Group == "ZMPJA")
 
@@ -91,6 +87,7 @@ print(genotypes_teosinte)
 ```
 
 Transpose the data for maize and teosinte
+
 ```{r, messages=FALSE}
 maize_transpose <- t(genotypes_maize)
 teosinte_transpose <- t(genotypes_teosinte)
@@ -100,6 +97,7 @@ print(teosinte_transpose)
 ```
 
 remove the unwanted columns from the snp data as indicated by the snp[-c(2,5:15)]. This means to remove column 2 and 5 through 15.
+
 ```{r}
 SNP_clean <- snp[-c(2,5:15)]
 SNP_clean # we can see we have the columns we want: SNP_ID, Chromosome, and Position
@@ -107,23 +105,26 @@ SNP_clean # we can see we have the columns we want: SNP_ID, Chromosome, and Posi
 ```
 
 label rownames as SNP_ID so we can then merge SNP_clean and the teosinte and maize files by row.names
+
 ```{r}
 rownames(SNP_clean) <- SNP_clean$SNP_ID
 rownames(SNP_clean)
 ```
 
 merge maize and snp_clean
+
 ```{r}
 joined_maize <- merge(SNP_clean, maize_transpose, by = "row.names")
 ```
 
 merge teosinte and snp_clean
+
 ```{r}
 joined_teosinte <- merge(SNP_clean, teosinte_transpose, by = "row.names")
 ```
 
-
 create a for-loop that cycles through chromosomes 1-10 in the joined_maize data file in my global env
+
 ```{r}
 for (i in 1:10) {chr_data <- subset(joined_maize, joined_maize[[3]] == i)  # Filters rows where the third column matches the chromosome number
 chr_data[is.na(chr_data)] <- "?" # Replaces NA values with "?"
@@ -133,6 +134,7 @@ assign(paste0("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment/
 ```
 
 same thing but for teosinte data
+
 ```{r}
 for (i in 1:10) {chr_teosinte <- subset(joined_teosinte, joined_teosinte[[3]] == i) # Creates a new variable name for each chromosome dataset
 chr_teosinte[is.na(chr_teosinte)] <- "?"  # Replaces NA values with "?"
@@ -142,6 +144,7 @@ assign(paste0("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment/
 ```
 
 Maize in decreasing order replacing "?" with "-"
+
 ```{r, results=FALSE}
 for (i in 1:10) {
   chr_maize <- subset(joined_maize, joined_maize[[3]] == i) # Creates a new variable for each chromosome dataset
@@ -154,6 +157,7 @@ for (i in 1:10) {
 ```
 
 same thing but for teosinte data
+
 ```{r, messages=FALSE}
 for (i in 1:10) {
   dec_teosinte <- subset(joined_teosinte, joined_teosinte[[3]] == i)
@@ -166,6 +170,7 @@ for (i in 1:10) {
 ```
 
 unknown positions for maize, this is looking at rows where the third column has a "?"
+
 ```{r}
 write.table(subset(joined_maize, joined_maize[[3]] == "?"), 
             file = file.path("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment", "unknown_positions_maize.txt"), 
@@ -173,6 +178,7 @@ write.table(subset(joined_maize, joined_maize[[3]] == "?"),
 ```
 
 unknown positions for teosinte, this is also looking at rows where the third column has a "?"
+
 ```{r}
 write.table(subset(joined_teosinte, joined_teosinte[[3]] == "?"), 
             file = file.path("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment", "unknown_positions_teosinte.txt"), 
@@ -187,18 +193,20 @@ library(dplyr)
 ```
 
 Combine maize and teosinte data with a new "Type" column which is either maize or teosinte
+
 ```{r}
 maize_type_data <- joined_maize %>% mutate(Type = "Maize")
 teosinte_type_data <- joined_teosinte %>% mutate(Type = "Teosinte")
 ```
 
 Merge teosinte and maize datasets
+
 ```{r}
 combined_data <- bind_rows(maize_type_data, teosinte_type_data)
 ```
 
-
 This creates the plot that shows the distribution of SNPs across chromosomes in both species
+
 ```{r}
 ggplot(combined_data, aes(x = as.factor(combined_data$Chromosome), fill = Type)) +
   geom_bar(position = "dodge") +
@@ -209,5 +217,5 @@ ggplot(combined_data, aes(x = as.factor(combined_data$Chromosome), fill = Type))
   theme_minimal() +
   scale_fill_manual(values = c("Maize" = "blue", "Teosinte" = "red"))
 ```
-From what I can tell based on the graph it seems as though teosinte and maize have the same number of SNPs in each chromosome
 
+From what I can tell based on the graph it seems as though teosinte and maize have the same number of SNPs in each chromosome

@@ -12,7 +12,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 setwd("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/Data files")
-
 library(dplyr)
 ```
 
