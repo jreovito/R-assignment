@@ -1,0 +1,15 @@
+---
+title:  "Review of Jordyn Eovito's R Assignment"
+author: "Modestos A. Modestou"
+date: "2025-03-25"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+Hello Jordyn, 
+
+I saw that you have uploaded an updated repository on GitHub that includes the R Markdown file Script.Rmd. However, the updated repository still doesn't include any other files except the output files, and so I can not run your code on my desktop.
