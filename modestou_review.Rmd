@@ -22,4 +22,6 @@ A few comments based on visual inspection of your code since, of course I couldn
 
 3. You mentioned from what you can tell based on the graphs that it seems as though teosinte and maize have the same number of SNPs in each chromosome. My graphs tell the same story. I think, however, it doesn't make sense that the number and distribution of SNPs for maize and teosinte are precisely the same. They shouldn't; maize likely has many more SNPs than its ancestor, teosinte. Unfortunately, I can't offer any suggestions here. I am still struggling myself to figure out how to fix it. 
 
-4. Good job despite the technical difficulties! I wish I could run your code on my desktop to offer more insightful suggestions.
+4. You still need two additional graphs for the Visualization Part of the assignment: one for the Missing data and Amount of Heterozygosity and another entirely of your choice. You only have the first one so far, i.e., SNPs per chromosome. Please remember to include those in your final submission.
+
+5. Good job despite the technical difficulties! I wish I could run your code on my desktop to offer more insightful suggestions.
