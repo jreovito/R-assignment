@@ -147,7 +147,33 @@ ggplot(combined_data, aes(x = as.factor(combined_data$Chromosome), fill = Type))
   scale_fill_manual(values = c("Maize" = "blue", "Teosinte" = "red"))
 # From what I can tell based on the graph it seems as though teosinte and maize have the same number of SNPs in each chromosome
 
+# Heterozygosity and Missing Data
 
+
+
+
+
+
+
+
+
+
+# My own visualization
+
+# Calculate the minimum SNP length for each species
+min_snp_length <- combined_data %>%
+  group_by(Type) %>%
+  summarize(min_length = min(Position, na.rm = TRUE))
+
+# Plot the minimum SNP lengths
+ggplot(min_snp_length, aes(x = Type, y = min_length, fill = Type)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Minimum SNP length",
+       x = "Species",
+       y = "Minimum SNP Length") +
+  theme_minimal() +
+  scale_fill_manual(values = c("Maize" = "blue", "Teosinte" = "red"))
+# As we can see both maize and teosinte have the same minimum SNP length
 
 
 
