@@ -13,6 +13,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 setwd("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/Data files")
 library(dplyr)
+library(tidyr)
+library(ggplot2)
 ```
 
 #### assigning txt files to fang or snp
@@ -126,33 +128,37 @@ joined_maize <- merge(SNP_clean, maize_transpose, by = "row.names")
 joined_teosinte <- merge(SNP_clean, teosinte_transpose, by = "row.names")
 ```
 
-#### create a for-loop that cycles through chromosomes 1-10 in the joined_maize data file in my global env
+#### create a for-loop that cycles through chromosomes 1-10 in the joined_maize data file in my global env and creates txt files in increasing order
 
 ```{r}
-for (i in 1:10) {chr_data <- subset(joined_maize, joined_maize[[3]] == i)  # Filters rows where the third column matches the chromosome number
-chr_data[is.na(chr_data)] <- "?" # Replaces NA values with "?"
-chr_data <- chr_data[order(chr_data[[2]]), ]  # Sorts the data by the second column in increasing order
-assign(paste0("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment/chr", i, "_increasing_maize"), chr_data)
-}  # Saves the result as a new dataframe in the environment
+for (i in 1:10) {inc_maize <- subset(joined_maize, joined_maize[[3]] == i)  # Filters rows where the third column matches the chromosome number
+inc_maize[is.na(inc_maize)] <- "?" # Replaces NA values with "?"
+inc_maize <- inc_maize[order(inc_maize[[2]]), ]  # Sorts the data by the second column in increasing order
+assign(paste0("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment/chr", i, "_increasing_maize"), inc_maize)
+write.table(inc_maize, file = paste0("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment/chr", i, "_increasing_maize.txt"), 
+            row.names = FALSE, col.names = TRUE, quote = FALSE, sep = "\t")
+}
 ```
 
 #### same thing but for teosinte data
 
 ```{r}
-for (i in 1:10) {chr_teosinte <- subset(joined_teosinte, joined_teosinte[[3]] == i) # Creates a new variable name for each chromosome dataset
-chr_teosinte[is.na(chr_teosinte)] <- "?"  # Replaces NA values with "?"
-chr_teosinte <- chr_teosinte[order(chr_teosinte[[2]]), ]  # Sorts the data by the second column in increasing order
-assign(paste0("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment/chr", i, "_increasing_teosinte"), chr_teosinte)
-}   # Saves as a separate dataframe in the environment
+for (i in 1:10) {inc_teosinte <- subset(joined_teosinte, joined_teosinte[[3]] == i) # Creates a new variable name for each chromosome dataset
+inc_teosinte[is.na(inc_teosinte)] <- "?"  # Replaces NA values with "?"
+inc_teosinte <- inc_teosinte[order(inc_teosinte[[2]]), ]  # Sorts the data by the second column in increasing order
+assign(paste0("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment/chr", i, "_increasing_teosinte"), inc_teosinte)
+write.table(inc_teosinte, file = paste0("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment/chr", i, "_increating_teosinte.txt"), 
+            row.names = FALSE, col.names = TRUE, quote = FALSE, sep = "\t")
+}
 ```
 
 #### Maize in decreasing order replacing "?" with "-"
 
 ```{r}
 for (i in 1:10) {
-  chr_maize <- subset(joined_maize, joined_maize[[3]] == i) # Creates a new variable for each chromosome dataset
-  chr_maize[chr_maize == "?"] <- "-" # Replaces "?" with "-"
-  chr_maize <- chr_maize[order(chr_maize[[2]], decreasing = TRUE), ] # Sorts by the second column in decreasing order
+  dec_maize <- subset(joined_maize, joined_maize[[3]] == i) # Creates a new variable for each chromosome dataset
+  dec_maize[dec_maize == "?"] <- "-" # Replaces "?" with "-"
+  dec_maize <- dec_maize[order(dec_maize[[2]], decreasing = TRUE), ] # Sorts by the second column in decreasing order
   assign(paste0("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment/chr", i, "_decreasing_maize"), chr_maize) # Saves as a separate dataframe in the environment
   write.table(chr_maize, file = paste0("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment/chr", i, "_decreasing_maize.txt"), 
               row.names = FALSE, col.names = TRUE, quote = FALSE, sep = "\t")
@@ -172,7 +178,7 @@ for (i in 1:10) {
 } # Writes the result to a file
 ```
 
-#### unknown positions for maize, this is looking at rows where the third column has a "?"
+#### unknown positions for maize, this is looking at rows where the third column has a "?".
 
 ```{r}
 write.table(subset(joined_maize, joined_maize[[3]] == "?"), 
@@ -221,4 +227,74 @@ ggplot(combined_data, aes(x = as.factor(combined_data$Chromosome), fill = Type))
   scale_fill_manual(values = c("Maize" = "blue", "Teosinte" = "red"))
 ```
 
-#### From what I can tell based on the graph it seems as though teosinte and maize have the same number of SNPs in each chromosome
+#### From what I can tell based on the graph it seems as though teosinte and maize have the same number of SNPs in each chromosome, although I am not entirely sure if this is correct given evolutionary relationships between the 2 species.
+
+#### Heterozygosity and missing Data visualization
+
+```{r}
+maize_type_data2 <- joined_maize %>% mutate(Type = "Maize")
+teosinte_type_data2 <- joined_teosinte %>% mutate(Type = "Teosinte")
+
+combined_data2 <- bind_rows(maize_type_data2, teosinte_type_data2)
+
+# this is where i use the information in combined_data2 EXCEPT SNP_ID, Chromsome, Row.names, and Position
+# so that I am only left with V1:1966 which are the alleles.
+# i use the recommended pivot_longer command to keep the type column the same but re-format the other columns so that I have the samples and the genotypes associated
+# next we assign alleles to homozygous, heterozygous and missing.
+# then I group by the Type column which indicates maize or teosinte and then the genotypes
+# then the proportion is calculated for each genotype and assigned to a new column which is count
+snp_counts <- combined_data2 %>%
+  select(-Row.names, -SNP_ID, -Chromosome, -Position) %>%
+  pivot_longer(cols = -Type, names_to = "Sample", values_to = "Genotype") %>%
+  mutate(Genotype = case_when(
+    Genotype %in% c("A/A", "G/G", "C/C", "T/T") ~ "Homozygous",
+    Genotype %in% c("A/T", "G/T", "C/T", "A/G") ~ "Heterozygous",
+    Genotype == "?/?" ~ "Missing"
+  )) %>%
+  group_by(Type, Genotype) %>%
+  summarise(Count = n()) %>%
+  mutate(Proportion = Count/sum(Count))
+
+ggplot(snp_counts, aes(x = Type, y = Proportion, fill = Genotype)) +
+  geom_bar(stat = "identity", position = "stack") +
+  labs(title = "Genotypes in Maize and Teosinte",
+       x = "Species",
+       y = "Proportion",
+       fill = "Genotype") +
+  theme_minimal() +
+  scale_fill_manual(values = c("Homozygous" = "blue", 
+                               "Heterozygous" = "red", 
+                               "Missing" = "gray"))
+```
+
+#### We can see that maize has slightly more heterozygous alleles, much more homozygous alleles, and a few more missing alleles
+
+#### I am not entirely sure if this is exactly what the question was asking but I tried my best to create the graph that I thought represented what the question wanted
+
+#### Data Visualization Part III: My own visualization: Which species has the smallest SNP length?
+
+#### this calculates the minimum SNP length in both maize and teosinte
+
+```{r}
+min_snp_length <- combined_data %>%
+  group_by(Type) %>%
+  summarize(min_length = min(Position, na.rm = TRUE))
+```
+
+#### plotting the minimum SNP length
+
+```{r}
+ggplot(min_snp_length, aes(x = Type, y = min_length, fill = Type)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Minimum SNP length",
+       x = "Species",
+       y = "Minimum SNP Length") +
+  theme_minimal() +
+  scale_fill_manual(values = c("Maize" = "blue", "Teosinte" = "red"))
+```
+
+#### as you can see both maize and teosinte have the same minimum SNP length, again, given the evolutionary relationship I am not entirely convinced this is correct but I couldn't figure out how to fix this issue of them having the same amount of SNPs
+
+
+
+

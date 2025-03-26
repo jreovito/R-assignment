@@ -84,6 +84,8 @@ for (i in 1:10) {chr_data <- subset(joined_maize, joined_maize[[3]] == i)  # Fil
 chr_data[is.na(chr_data)] <- "?" # Replaces NA values with "?"
 chr_data <- chr_data[order(chr_data[[2]]), ]  # Sorts the data by the second column in increasing order
 assign(paste0("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment/chr", i, "_increasing_maize"), chr_data)
+write.table(chr_maize, file = paste0("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment/chr", i, "_increasing_maize.txt"), 
+            row.names = FALSE, col.names = TRUE, quote = FALSE, sep = "\t")
 }  # Saves the result as a new dataframe in the environment
 
 # same thing but for teosinte data
@@ -91,6 +93,8 @@ for (i in 1:10) {chr_teosinte <- subset(joined_teosinte, joined_teosinte[[3]] ==
 chr_teosinte[is.na(chr_teosinte)] <- "?"  # Replaces NA values with "?"
 chr_teosinte <- chr_teosinte[order(chr_teosinte[[2]]), ]  # Sorts the data by the second column in increasing order
 assign(paste0("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment/chr", i, "_increasing_teosinte"), chr_teosinte)
+write.table(chr_teosinte, file = paste0("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment/chr", i, "_increating_teosinte.txt"), 
+            row.names = FALSE, col.names = TRUE, quote = FALSE, sep = "\t")
 }   # Saves as a separate dataframe in the environment
 
 # Maize in decreasing order replacing "?" with "-"
@@ -155,27 +159,39 @@ library(tidyr)
 
 # I am not entirely sure if this is what the questions was asking but I tried my best to create the graphs that I thought answered it.
 
-# Add a column to identify the species similarly to how I did before
-maize2 <- maize2 %>%  mutate(Species = "Maize")
+maize_type_data2 <- joined_maize %>% mutate(Type = "Maize")
+teosinte_type_data2 <- joined_teosinte %>% mutate(Type = "Teosinte")
 
-teosinte2 <- teosinte2 %>% mutate(Species = "Teosinte")
+combined_data2 <- bind_rows(maize_type_data2, teosinte_type_data2)
 
-# Combine the datasets
-combined_data2 <- bind_rows(maize2, teosinte2)
+# this is where i use the information in combined_data2 EXCEPT SNP_ID, Chromsome, Row.names, and Position
+# so that I am only left with V1:1966 which are the alleles.
+# i use the recommended pivot_longer command to keep the type column the same but re-format the other columns so that I have the samples and the genotypes associated
+# next we assign alleles to homozygous, heterozygous and missing.
+# then I group by the Type column which indicates maize or teosinte and then the genotypes
+# then the proportion is calculated for each genotype and assigned to a new column which is count
+snp_counts <- combined_data2 %>%
+  select(-Row.names, -SNP_ID, -Chromosome, -Position) %>%
+  pivot_longer(cols = -Type, names_to = "Sample", values_to = "Genotype") %>%
+  mutate(Genotype = case_when(
+    Genotype %in% c("A/A", "G/G", "C/C", "T/T") ~ "Homozygous",
+    Genotype %in% c("A/T", "G/T", "C/T", "A/G") ~ "Heterozygous",
+    Genotype == "?/?" ~ "Missing"
+  )) %>%
+  group_by(Type, Genotype) %>%
+  summarise(Count = n()) %>%
+  mutate(Proportion = Count/sum(Count))
 
-# Define allele types for the combined dataset, this is saying when you come across "A/A, G/G, C/C, or T/T" to assign homozygous, 
-# when you come across "?/?" assign missing, and the "TRUE" indicates that anything that was not assigned homozygous or missing to be assigned heterozygous
-combined_data2 <- combined_data2 %>%
-  mutate(Allele_Type = case_when(
-    SNP %in% c("A/A", "G/G", "C/C", "T/T") ~ "Homozygous",
-    SNP == "?/?" ~ "Missing",
-    TRUE ~ "Heterozygous"
-  ))
-
-ggplot(data = combined_data2) +
-  geom_bar(mapping = aes(x = Allele_Type, fill = Species), position = "dodge") +
-  labs(x = "Allele Type", y = "Count", title = "Allele Types in Maize and Teosinte") +
-  theme_minimal()
+ggplot(snp_counts, aes(x = Type, y = Proportion, fill = Genotype)) +
+  geom_bar(stat = "identity", position = "stack") +
+  labs(title = "Genotypes in Maize and Teosinte",
+       x = "Species",
+       y = "Proportion",
+       fill = "Genotype") +
+  theme_minimal() +
+  scale_fill_manual(values = c("Homozygous" = "blue", 
+                               "Heterozygous" = "red", 
+                               "Missing" = "gray"))
 # we can see that maize has slightly more heterozygous alleles, much more homozygous alleles, and a few more missing alleles
 
 # Part III: My own visualization
