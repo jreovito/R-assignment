@@ -74,57 +74,56 @@ rownames(SNP_clean) <- SNP_clean$SNP_ID
 rownames(SNP_clean)
 
 # merge maize and snp_clean
-joined_maize <- merge(SNP_clean, maize_transpose, by = "row.names")
+joined_maize <- merge(SNP_clean, maize_transpose)
 
 # merge teosinte and snp_clean
-joined_teosinte <- merge(SNP_clean, teosinte_transpose, by = "row.names")
+joined_teosinte <- merge(SNP_clean, teosinte_transpose)
 
-# create a for-loop that cycles through chromosomes 1-10 in the joined_maize data file in my global env
-for (i in 1:10) {chr_data <- subset(joined_maize, joined_maize[[3]] == i)  # Filters rows where the third column matches the chromosome number
-chr_data[is.na(chr_data)] <- "?" # Replaces NA values with "?"
-chr_data <- chr_data[order(chr_data[[2]]), ]  # Sorts the data by the second column in increasing order
-assign(paste0("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment/chr", i, "_increasing_maize"), chr_data)
-write.table(chr_maize, file = paste0("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment/chr", i, "_increasing_maize.txt"), 
+# create a for-loop that cycles through chromosomes 1-10 in the joined_maize data file in my global env and creates txt files by position in increasing order.
+for (i in 1:10) {inc_maize <- subset(joined_maize, joined_maize$Chromosome == i)
+inc_maize[is.na(inc_maize)] <- "?"
+inc_maize <- inc_maize[order(inc_maize$Position), ]
+assign(paste0("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment/chr", i, "_increasing_maize"), inc_maize)
+write.table(inc_maize, file = paste0("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment/chr", i, "_increasing_maize.txt"), 
             row.names = FALSE, col.names = TRUE, quote = FALSE, sep = "\t")
-}  # Saves the result as a new dataframe in the environment
+}
 
 # same thing but for teosinte data
-for (i in 1:10) {chr_teosinte <- subset(joined_teosinte, joined_teosinte[[3]] == i) # Creates a new variable name for each chromosome dataset
-chr_teosinte[is.na(chr_teosinte)] <- "?"  # Replaces NA values with "?"
-chr_teosinte <- chr_teosinte[order(chr_teosinte[[2]]), ]  # Sorts the data by the second column in increasing order
-assign(paste0("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment/chr", i, "_increasing_teosinte"), chr_teosinte)
-write.table(chr_teosinte, file = paste0("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment/chr", i, "_increating_teosinte.txt"), 
+for (i in 1:10) {inc_teosinte <- subset(joined_teosinte, joined_teosinte$Chromosome == i)
+inc_teosinte[is.na(inc_teosinte)] <- "?"
+inc_teosinte <- inc_teosinte[order(inc_teosinte$Position), ]
+assign(paste0("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment/chr", i, "_increasing_teosinte"), inc_teosinte)
+write.table(inc_teosinte, file = paste0("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment/chr", i, "_increating_teosinte.txt"), 
             row.names = FALSE, col.names = TRUE, quote = FALSE, sep = "\t")
-}   # Saves as a separate dataframe in the environment
+}
 
-# Maize in decreasing order replacing "?" with "-"
-
+# Maize in decreasing order replacing "?" with "-". Creating a single file for each chromosome and sorting by position in decreasing order.
 for (i in 1:10) {
-  chr_maize <- subset(joined_maize, joined_maize[[3]] == i) # Creates a new variable for each chromosome dataset
-  chr_maize[chr_maize == "?"] <- "-" # Replaces "?" with "-"
-  chr_maize <- chr_maize[order(chr_maize[[2]], decreasing = TRUE), ] # Sorts by the second column in decreasing order
-  assign(paste0("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment/chr", i, "_decreasing_maize"), chr_maize) # Saves as a separate dataframe in the environment
-  write.table(chr_maize, file = paste0("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment/chr", i, "_decreasing_maize.txt"), 
-              row.names = FALSE, col.names = TRUE, quote = FALSE, sep = "\t")
-} # Writes to a text file
+  dec_maize <- subset(joined_maize, joined_maize$Chromosome == i)
+  dec_maize[dec_maize == "?/?"] <- "-/-"
+  dec_maize <- dec_maize[order(dec_maize$Position, decreasing = TRUE), ]
+  assign(paste0("chr", i, "_decreasing_maize"), dec_maize)
+  write.table(dec_maize, file = paste0("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment/chr", i, "_decreasing_maize.txt"), 
+              row.names = FALSE, col.names = TRUE, quote = FALSE, sep = "\t") 
+}
 
 # same thing but for teosinte data
 for (i in 1:10) {
-  dec_teosinte <- subset(joined_teosinte, joined_teosinte[[3]] == i)
-  dec_teosinte[dec_teosinte == "?"] <- "-"  # Replace "?" with "-"
-  dec_teosinte <- dec_teosinte[order(dec_teosinte[[2]], decreasing = TRUE), ] # Sorts the data by the second column in decreasing order
-  assign(paste0("chr", i, "_decreasing_teosinte"), dec_teosinte) # Saves as a new variable in the environment
-  write.table(dec_teosinte, file = paste0("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment/chr", i, "_decreasing_teosinte.txt"), 
+  dec_teosinte <- subset(joined_teosinte, joined_teosinte$Chromosome == i)
+  dec_teosinte[dec_teosinte == "?/?"] <- "-/-"
+  dec_teosinte <- dec_teosinte[order(dec_teosinte$Position, decreasing = TRUE), ]
+  assign(paste0("chr", i, "_decreasing_maize"), dec_maize)
+  write.table(dec_teosinte, file = paste0("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment/chr", i, "_decreasing_maize.txt"), 
               row.names = FALSE, col.names = TRUE, quote = FALSE, sep = "\t")
-} # Writes the result to a file
+}
 
 # unknown positions for maize, this is looking at rows where the third column has a "?"
-write.table(subset(joined_maize, joined_maize[[3]] == "?"), 
+write.table(subset(joined_maize, joined_maize$Position == "?"), 
             file = file.path("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment", "unknown_positions_maize.txt"), 
             row.names = FALSE, col.names = TRUE, quote = FALSE, sep = "\t")
 
 # unknown positions for teosinte, this is also looking at rows where the third column has a "?"
-write.table(subset(joined_teosinte, joined_teosinte[[3]] == "?"), 
+write.table(subset(joined_teosinte, joined_teosinte$Position == "?"), 
             file = file.path("/Users/jordyn/Desktop/BCB546_Spring2025/assignments/R-Assignment", "unknown_positions_teosinte.txt"), 
             row.names = FALSE, col.names = TRUE, quote = FALSE, sep = "\t")
 
@@ -210,6 +209,10 @@ ggplot(min_snp_length, aes(x = Type, y = min_length, fill = Type)) +
   theme_minimal() +
   scale_fill_manual(values = c("Maize" = "blue", "Teosinte" = "red"))
 # As we can see both maize and teosinte have the same minimum SNP length
+
+
+
+
 
 
 
