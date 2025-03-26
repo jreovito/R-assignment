@@ -149,16 +149,36 @@ ggplot(combined_data, aes(x = as.factor(combined_data$Chromosome), fill = Type))
 
 # Heterozygosity and Missing Data
 
+library(dplyr)
+library(ggplot2)
+library(tidyr)
 
+# I am not entirely sure if this is what the questions was asking but I tried my best to create the graphs that I thought answered it.
 
+# Add a column to identify the species similarly to how I did before
+maize2 <- maize2 %>%  mutate(Species = "Maize")
 
+teosinte2 <- teosinte2 %>% mutate(Species = "Teosinte")
 
+# Combine the datasets
+combined_data2 <- bind_rows(maize2, teosinte2)
 
+# Define allele types for the combined dataset, this is saying when you come across "A/A, G/G, C/C, or T/T" to assign homozygous, 
+# when you come across "?/?" assign missing, and the "TRUE" indicates that anything that was not assigned homozygous or missing to be assigned heterozygous
+combined_data2 <- combined_data2 %>%
+  mutate(Allele_Type = case_when(
+    SNP %in% c("A/A", "G/G", "C/C", "T/T") ~ "Homozygous",
+    SNP == "?/?" ~ "Missing",
+    TRUE ~ "Heterozygous"
+  ))
 
+ggplot(data = combined_data2) +
+  geom_bar(mapping = aes(x = Allele_Type, fill = Species), position = "dodge") +
+  labs(x = "Allele Type", y = "Count", title = "Allele Types in Maize and Teosinte") +
+  theme_minimal()
+# we can see that maize has slightly more heterozygous alleles, much more homozygous alleles, and a few more missing alleles
 
-
-
-# My own visualization
+# Part III: My own visualization
 
 # Calculate the minimum SNP length for each species
 min_snp_length <- combined_data %>%
@@ -174,8 +194,6 @@ ggplot(min_snp_length, aes(x = Type, y = min_length, fill = Type)) +
   theme_minimal() +
   scale_fill_manual(values = c("Maize" = "blue", "Teosinte" = "red"))
 # As we can see both maize and teosinte have the same minimum SNP length
-
-
 
 
 
